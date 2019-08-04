@@ -21,6 +21,8 @@ https://lilinlinlin.github.io/2019/07/23/Linux-nfs-%E6%90%AD%E5%BB%BA/
 
 #### 1.1.1 安装nfs-client-provisioner指令：
 `helm install --name nfs-client --set nfs.server=192.168.0.9 --set nfs.path=/nfsdatas stable/nfs-client-provisioner`
+如果安装报错，显示没有该helm的stable，在机器上添加helm 源
+`helm repo add stable http://mirror.azure.cn/kubernetes/charts/`
 #### 1.1.2 卸载指令：
 `helm delete nfs-client`
 #### 1.1.3 验证storageClass是否存在

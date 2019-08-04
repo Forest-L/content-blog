@@ -41,9 +41,11 @@ nfs服务的开机自启和启动：
 5. no_root_squash: 可以使用root授权。
 6. no_all_squash: 可以使用普通用户授权
 
+`systemctl restart nfs`
+
 ## 2.1客户端安装（192.168.0.10）
 <font color=#DC143C >centos:</font>
-`sudo yum install nfs-utils -f`
+`sudo yum install nfs-utils -y`
 
 <font color=#DC143C >ubuntu16.04:</font>
 `sudo apt install nfs-common`
@@ -56,7 +58,7 @@ nfs服务的开机自启和启动：
 `sudo systemctl enable nfs-common;sudo systemctl restart nfs-common`
 ## 2.3客户端验证及测试
 检查服务端的共享目录：
-`showemount -e 192.168.0.9`
+`showmount -e 192.168.0.9`
 客户端创建目录
 `sudo mkdir -p /tmp/nfsdata`
 挂载指令：
