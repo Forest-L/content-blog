@@ -1,13 +1,11 @@
 ---
-title: k8s1.15安装
-date: 2019-07-28 20:15:32
+title: centos系统k8s-1.16版本安装
+date: 2019-09-22 21:48:14
 tags: k8s tools
 top: 100
 ---
-# 使用kubeadm安装k8s 1.15版本
-k8s 1.15版本中，kubeadm对HA集群的配置已经达到了beta可用，这一版本更新主要是针对稳定性的持续改善和可扩展性。其中用到的镜像和rpm包在百度云上，链接如下。
-https://pan.baidu.com/s/1LoKvv86Fs5ilZ-TYQdN35A
-cos3
+# centos系统k8s-1.16版本安装
+k8s1.16版本相对之前版本变化不小，亮点和升级参看[v1.16说明](http://k8smeetup.com/article/N1lqGc0i8v)。相关联的镜像和v1.16二进制包上传至百度云上，链接如下[k8s1.16介质，ftq5](https://pan.baidu.com/s/19khl0Hn5ZnZ8TvbO5HZVww)
 <!--more--> 
 ## 1.准备
 ### 1.1系统准备
@@ -53,7 +51,7 @@ yum install ipset ipvsadm -y
 `sed -i 's+download.docker.com+mirrors.tuna.tsinghua.edu.cn/docker-ce+' /etc/yum.repos.d/docker-ce.repo`
 `yum makecache fast`
 `yum install docker-ce -y`
-重启docker：`systemctl enable docker;systemctl restart docker`
+	重启docker：`systemctl enable docker;systemctl restart docker`
 修改docker cgroup driver为systemd
 创建或修改`vi /etc/docker/daemon.json`：
 ```
@@ -63,10 +61,11 @@ yum install ipset ipvsadm -y
 ```
 重启docker:`systemctl restart docker`
 
+
 ## 2. 使用kubeadm部署kubernetes
 ### 2.1 安装kubeadm和kubelet
-下面在各节点安装kubeadm和kubelet和kubectl，请在百度云上面下载rpm包，在rmp目录下执行如下指令：
-`yum install -y cri-tools-1.13.0-0.x86_64.rpm kubernetes-cni-0.7.5-0.x86_64.rpm kubelet-1.15.1-0.x86_64.rpm kubectl-1.15.1-0.x86_64.rpm kubeadm-1.15.1-0.x86_64.rpm `
+下面在各节点安装kubeadm和kubelet和kubectl，请在百度云上面下载rpm包，在k8s116目录下执行如下指令：
+`yum install -y cri-tools-1.13.0-0.x86_64.rpm cni-0.7.5-0.x86_64.rpm kubelet-1.16.0-0.x86_64.rpm kubectl-1.16.0-0.x86_64.rpm kubeadm-1.16.0-0.x86_64.rpm `
 k8s 1.8开始要求关闭系统的swap,不关闭，kubelet将无法启动，执行指令方法：
 `swapoff -a`
 修改 /etc/fstab 文件，注释掉 SWAP 的自动挂载，使用free -m确认swap已经关闭。 swappiness参数调整，修改`vi /etc/sysctl.d/k8s.conf`添加下面一行：
@@ -131,25 +130,26 @@ nodeRegistration:
 ---
 apiVersion: kubeadm.k8s.io/v1beta2
 kind: ClusterConfiguration
-kubernetesVersion: v1.15.0
+kubernetesVersion: v1.16.0
 networking:
   podSubnet: 10.244.0.0/16
 ```
 <font color=#DC143C >说 明 : </font>
 使用kubeadm默认配置初始化的集群，会在master节点打上node-role.kubernetes.io/master:NoSchedule的污点，阻止master节点接受调度运行工作负载。这里测试环境只有两个节点，所以将这个taint修改为node-role.kubernetes.io/master:PreferNoSchedule。
 
-在开始初始化集群之前，需要从百度云上面下载tar包镜像下来，tar通过scp分别传到各个节点执行docker load -i解压，
+在开始初始化集群之前，kubeadm config images pull查看需要哪些镜像,需要从百度云上面下载tar包镜像下来，tar通过scp分别传到各个节点执行docker load -i解压，
 镜像列表:
 ```
-k8s.gcr.io/kube-proxy                v1.15.0             d235b23c3570        5 weeks ago         82.4MB
-k8s.gcr.io/kube-apiserver            v1.15.0             201c7a840312        5 weeks ago         207MB
-k8s.gcr.io/kube-scheduler            v1.15.0             2d3813851e87        5 weeks ago         81.1MB
-k8s.gcr.io/kube-controller-manager   v1.15.0             8328bb49b652        5 weeks ago         159MB
-gcr.io/kubernetes-helm/tiller        v2.14.1             ac22eb1f780e        7 weeks ago         94.2MB
-quay.io/coreos/flannel               v0.11.0-amd64       ff281650a721        6 months ago        52.6MB
-k8s.gcr.io/coredns                   1.3.1               eb516548c180        6 months ago        40.3MB
-k8s.gcr.io/etcd                      3.3.10              2c4adeb21b4f        8 months ago        258MB
-k8s.gcr.io/pause                     3.1                 da86e6ba6ca1        19 months ago       742kB
+k8s.gcr.io/kube-apiserver            v1.16.0             b305571ca60a        42 hours ago        217MB
+k8s.gcr.io/kube-proxy                v1.16.0             c21b0c7400f9        42 hours ago        86.1MB
+k8s.gcr.io/kube-controller-manager   v1.16.0             06a629a7e51c        42 hours ago        163MB
+k8s.gcr.io/kube-scheduler            v1.16.0             301ddc62b80b        42 hours ago        87.3MB
+k8s.gcr.io/etcd                      3.3.15-0            b2756210eeab        2 weeks ago         247MB
+k8s.gcr.io/coredns                   1.6.2               bf261d157914        5 weeks ago         44.1MB
+gcr.io/kubernetes-helm/tiller        v2.14.1             ac22eb1f780e        3 months ago        94.2MB
+quay.io/coreos/flannel               v0.11.0-amd64       ff281650a721        7 months ago        52.6MB
+k8s.gcr.io/pause                     3.1                 da86e6ba6ca1        21 months ago       742kB
+radial/busyboxplus                   curl                71fa7369f437        5 years ago         4.23MB
 ```
 接下来使用kubeadm初始化集群，选择node1作为Master Node，在node1上执行下面的命令：`kubeadm init --config kubeadm.yaml --ignore-preflight-errors=Swap`
 
@@ -183,6 +183,11 @@ sudo chown $(id -u):$(id -g) $HOME/.kube/config
 `curl -O https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml`
 `kubectl apply -f  kube-flannel.yml`
 这里注意kube-flannel.yml这个文件里的flannel的镜像是0.11.0，quay.io/coreos/flannel:v0.11.0-amd64
+注意需要在vi /var/lib/kubelet/kubeadm-flags.env文件配置中去掉--network-plugin=cni,然后重启kubelet,
+```
+systemctl daemon-reload
+systemctl restart kubelet
+```
 如果Node有多个网卡的话，参考https://github.com/kubernetes/kubernetes/issues/39701，
 目前需要在kube-flannel.yml中使用–iface参数指定集群主机内网网卡的名称，否则可能会出现dns无法解析。需要将kube-flannel.yml下载到本地，flanneld启动参数加上–iface=<iface-name>
 ```
@@ -197,10 +202,10 @@ containers:
         - --iface=eth1
 ......
 ```
-使用`kubectl get pod –-all-namespaces -o wide`确保所有的Pod都处于Running状态。
+使用`kubectl get pods –-all-namespaces -o wide`确保所有的Pod都处于Running状态。
 ```
 kube-flannel.yml
-[root@i-fahx5c7k k8s]# kubectl get pod --all-namespaces -o wide
+[root@i-fahx5c7k k8s]# kubectl get pods --all-namespaces -o wide
 NAMESPACE     NAME                                 READY   STATUS    RESTARTS   AGE     IP              NODE         NOMINATED NODE   READINESS GATES
 kube-system   coredns-5c98db65d4-nbb4w             1/1     Running   0          6m29s   10.244.0.2      i-fahx5c7k   <none>           <none>
 kube-system   coredns-5c98db65d4-wtm58             1/1     Running   0          6m29s   10.244.0.3      i-fahx5c7k   <none>           <none>
@@ -258,34 +263,36 @@ Helm由客户端命helm令行工具和服务端tiller组成，Helm的安装十�
 `cd linux-amd64/`
 `cp helm /usr/local/bin/`
 为了安装服务端tiller，还需要在这台机器上配置好kubectl工具和kubeconfig文件，确保kubectl工具可以在这台机器上访问apiserver且正常使用。 这里的11.21节点已经配置好了kubectl。
-因为Kubernetes APIServer开启了RBAC访问控制，所以需要创建tiller使用的service account: tiller并分配合适的角色给它。这里简单起见直接分配cluster-admin这个集群内置的ClusterRole给它。创建`vi helm-rbac.yaml`文件：
+`helm init --output yaml > tiller.yaml`
+更新 tiller.yaml 两处：apiVersion 版本;增加选择器
 ```
-apiVersion: v1
-kind: ServiceAccount
-metadata:
-  name: tiller
-  namespace: kube-system
----
-apiVersion: rbac.authorization.k8s.io/v1beta1
-kind: ClusterRoleBinding
-metadata:
-  name: tiller
-roleRef:
-  apiGroup: rbac.authorization.k8s.io
-  kind: ClusterRole
-  name: cluster-admin
-subjects:
-  - kind: ServiceAccount
-    name: tiller
-    namespace: kube-system
+apiVersion: apps/v1
+kind: Deployment
+...
+spec:
+  replicas: 1
+  strategy: {}
+  selector:
+    matchLabels:
+      app: helm
+      name: tiller
 ```
-`kubectl create -f helm-rbac.yaml`
-接下来使用helm部署tiller:
-`helm init --service-account tiller --skip-refresh`
-tiller默认被部署在k8s集群中的kube-system这个namespace下：
+创建：`kubectl create -f tiller.yaml`
+因为Kubernetes APIServer开启了RBAC访问控制，所以需要创建tiller使用的service account: tiller并分配合适的角色给它。这里简单起见直接分配cluster-admin这个集群内置的ClusterRole给它。
 ```
-[root@i-fahx5c7k centosrepo]# kubectl get pod -n kube-system -l app=helm
-NAME                             READY   STATUS    RESTARTS   AGE
-tiller-deploy-7bf78cdbf7-46bv5   1/1     Running   0          22s
+kubectl create serviceaccount --namespace kube-system tiller
+kubectl create clusterrolebinding tiller-cluster-rule --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
+kubectl patch deploy --namespace kube-system tiller-deploy -p '{"spec":{"template":{"spec":{"serviceAccount":"tiller"}}}}'
 ```
-`helm version`
+检查helm是否安装成功`helm list`
+
+### 安装k8s1.16脚本的安装
+解压包，然后执行脚本install-k8s.sh
+`tar -xzvf k8s116.tar.gz`
+`./install-k8s.sh` 
+
+
+
+#### 参考文档
+[kubeadm安装](https://kubernetes.io/zh/docs/)
+[kubeadm创建集群](https://kubernetes.io/zh/docs/setup/independent/create-cluster-kubeadm/)

@@ -41,7 +41,10 @@ nfs服务的开机自启和启动：
 5. no_root_squash: 可以使用root授权。
 6. no_all_squash: 可以使用普通用户授权
 
+<font color=#DC143C >centos:</font>
 `systemctl restart nfs`
+<font color=#DC143C >ubuntu16.04:</font>
+`sudo systemctl restart nfs-kernel-server`
 
 ## 2.1客户端安装（192.168.0.10）
 <font color=#DC143C >centos:</font>
@@ -66,3 +69,64 @@ nfs服务的开机自启和启动：
 然后进入/tmp/nfsdata目录下，新建文件
 `sudo touch test`
 之后在nfs服务端192.168.0.9的/nfsdatas目录查看是否有test文件
+
+## cenots和ubuntu脚本部署
+下面内容添加：vi nfs-install.sh
+加权限和执行：chmod +x nfs-install.sh && ./nfs-install.sh
+以下脚本安装的服务端目录为：/nfsdatas,如果需要修改的话，脚本内容需要修改。
+```
+#!/bin/bash
+
+function centostest(){
+    yum clean all;yum makecache
+    yum install nfs-utils -y
+    systemctl enable rpcbind;sudo systemctl restart rpcbind
+    systemctl enable nfs;sudo systemctl restart nfs
+    mkdir -p /nfsdatas
+    chmod 755 /nfsdatas
+    echo "/nfsdatas/ 192.168.0.0/16(rw,sync,no_root_squash,no_all_squash)" > /etc/exports
+    systemctl restart nfs
+    showmount -e localhost
+    if [[ $? -eq 0 ]]; then
+        #statements
+        str="successsful!"
+        echo -e "\033[30;47m$str\033[0m"  
+    else
+        str="failed!"
+        echo -e "\033[31;47m$str\033[0m"
+        exit
+    fi
+}
+
+function ubuntutest(){
+    apt-get update
+    sudo apt install nfs-kernel-server
+    sudo systemctl enable nfs-kernel-server;sudo systemctl restart nfs-kernel-server
+    mkdir -p /nfsdatas
+    chmod 755 /nfsdatas
+    echo "/nfsdatas/ 192.168.0.0/16(rw,sync,no_root_squash,no_all_squash)" > /etc/exports
+    sudo systemctl restart nfs-kernel-server
+    showmount -e localhost
+    if [[ $? -eq 0 ]]; then
+        #statements
+        str="successsful!"
+        echo -e "\033[30;47m$str\033[0m"  
+    else
+        str="failed!"
+        echo -e "\033[31;47m$str\033[0m"
+        exit
+    fi
+}
+
+cat /etc/redhat-release
+
+if [[ $? -eq 0 ]]; then
+    str="centos!"
+    echo -e "\033[30;47m$str\033[0m"
+    centostest
+else
+    str="ubuntu!"
+    echo -e "\033[31;47m$str\033[0m"
+    ubuntutest
+fi
+```

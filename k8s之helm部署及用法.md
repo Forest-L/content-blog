@@ -1,7 +1,10 @@
 ---
 title: k8s之helm部署及用法
 date: 2019-07-29 20:58:28
-tags: k8s tools
+tags: 
+  - k8s tools
+  - helm
+
 top: 100
 ---
 # k8s之helm部署及用法
@@ -64,6 +67,7 @@ subjects:
 `kubectl create -f helm-rbac.yaml`
 ## 3.添加国内helm源
 `helm repo add stable http://mirror.azure.cn/kubernetes/charts/`
+`helm repo add apphub https://apphub.aliyuncs.com`
 更新chart repo: `helm repo update`
 ## 4. helm的基本使用
 下面我们开始尝试创建一个chart，这个chart用来部署一个简单的服务
