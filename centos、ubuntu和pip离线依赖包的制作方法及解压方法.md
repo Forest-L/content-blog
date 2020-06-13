@@ -34,10 +34,10 @@ pip install --no-index --find-links="/packs" -r requirements.txt
 * 制作离线包
 ```
 创建存放目录：mkdir -p /home/ubuntu/packs；
-拷贝dep包至存放目录：sudo cp /var/cache/apt/archives/* ~/packs；
 安装软件包dpkg-dev:apt-get install dpkg-dev
+拷贝dep包至存放目录：sudo cp -r /var/cache/apt/archives/* /home/ubuntu/packs；
 进入packs目录下，生成包的依赖信息：dpkg-scanpackages packs /dev/null |gzip > packs/Packages.gz
-制作iso包：mkisofs -r -o /root/ubuntu-16.04.5-amd64.iso /packs
+制作iso包：mkisofs -r -o /home/ubuntu/ubuntu-16.04.5-amd64.iso /home/ubunut/packs
 ```
 
 * 解压离线包,如Ubuntu16.04.5

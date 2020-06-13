@@ -9,7 +9,7 @@ top: 100
 
 nfs是网络存储文件系统，客户端通过网络访问不同主机上磁盘的数据，用于unix系统。
 <!--more-->
-## 演示nfs机器信息，分为服务端和客户端介绍
+## 演示nfs机器信息，分为服务端和客户端介绍，以下服务端的ip请根据自己环境来替换。
 服务端：192.168.0.9，客户端：192.168.0.10
 ## 1.1服务端安装（192.168.0.9）
 <font color=#DC143C >centos:</font>
@@ -33,7 +33,7 @@ nfs服务的开机自启和启动：
 <font color=#DC143C >重要:</font> 根据上面创建的目录，相应配置导出目录
 `sudo vi /etc/exports`
 添加如下配置再保存，重启nfs服务即可：
-/nfsdatas/ 192.168.0.0/24(rw,sync,no_root_squash,no_all_squash)
+/nfsdatas/ 192.168.0.0/16(rw,sync,no_root_squash,no_all_squash)
 1. /nfsdatas:共享目录位置。
 2. 192.168.0.0/24：客户端IP范围，*代表所有。
 3. rw：权限设置，可读可写。
@@ -69,7 +69,8 @@ nfs服务的开机自启和启动：
 然后进入/tmp/nfsdata目录下，新建文件
 `sudo touch test`
 之后在nfs服务端192.168.0.9的/nfsdatas目录查看是否有test文件
-
+卸载指令：不要在/tmp/nfsdata目录下执行卸载指令。
+`umount /tmp/nfsdata`
 ## cenots和ubuntu脚本部署
 下面内容添加：vi nfs-install.sh
 加权限和执行：chmod +x nfs-install.sh && ./nfs-install.sh
